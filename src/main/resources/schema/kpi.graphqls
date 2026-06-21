@@ -1,0 +1,25 @@
+# ── Query base ────────────────────────────────────────────────────────────────
+# Cada integrante extiende este tipo en su propio archivo .graphqls:
+#
+#   extend type Query {
+#       kpiMiMetrica: MiTipo!
+#   }
+#
+# DGS fusiona automáticamente todos los archivos de este directorio.
+# ─────────────────────────────────────────────────────────────────────────────
+
+type Query {
+    kpiTasaConversion: [ConversionStats!]!
+}
+
+# ── Integrante 1: Tasa de conversión ─────────────────────────────────────────
+# Cruza el Top 5 de libros más clickeados (Redis) con las reservas activas
+# (PostgreSQL) para calcular qué porcentaje de visitas se convierte en reserva.
+
+type ConversionStats {
+    bookId:         String!
+    title:          String!
+    clicks:         Int!
+    reservas:       Int!
+    tasaConversion: Float!
+}

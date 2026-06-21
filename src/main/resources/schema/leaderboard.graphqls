@@ -1,0 +1,14 @@
+# ── Integrante 2: Leaderboard de Comunidad ───────────────────────────────────
+# Top 5 de usuarios con más Bibliokarmas. Cache-aside sobre Redis:
+# el resolver intenta leer la clave "leaderboard:bibliokarmas"; ante un
+# cache miss lo calcula desde PostgreSQL y lo guarda con TTL de 20 minutos.
+
+extend type Query {
+    kpiLeaderboardBibliokarmas: [LeaderboardEntry!]!
+}
+
+type LeaderboardEntry {
+    userId:       Int!
+    username:     String!
+    bibliokarmas: Int!
+}

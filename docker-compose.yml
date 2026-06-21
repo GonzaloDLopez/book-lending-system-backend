@@ -1,0 +1,151 @@
+services:
+## Kotlin Backend
+  backend:
+    image: gradle:8.8-jdk21
+    container_name: kotlin-backend
+    working_dir: /app
+    volumes:
+      - ./:/app
+      - gradle_cache:/root/.gradle
+    ports:
+      - "9000:8080"
+    command: gradle bootRun --args='--server.port=8080' --no-daemon
+    environment:
+      SPRING_PROFILES_ACTIVE: docker
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/${POSTGRES_DB:-db_booklibre}
+      SPRING_DATASOURCE_USERNAME: ${POSTGRES_USER:-booklibre}
+      SPRING_DATASOURCE_PASSWORD: ${POSTGRES_PASSWORD:-booklibre}
+    depends_on:
+      mongo:
+        condition: service_healthy
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    networks:
+      - app_net
+
+## React Frontend
+  frontend:
+    image: node:20
+    container_name: react-frontend
+    working_dir: /app
+    volumes:
+      - ../appointment-booking-system-frontend:/app
+      - frontend_node_modules:/app/node_modules
+    ports:
+      - "5173:5173"
+    command: >
+      bash -c "
+        npm ci &&
+        npm run dev -- --host 0.0.0.0
+      "
+    environment:
+      CHOKIDAR_USEPOLLING: "true"
+      VITE_API_URL: http://localhost:9000
+      NO_PROXY: localhost,127.0.0.1,postgres,backend,frontend,mongo,redis
+    depends_on:
+      - backend
+    networks:
+      - app_net
+
+## Postgres
+  postgres:
+    image: postgres:16
+    container_name: postgres-booklibre
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB:-db_booklibre}
+      POSTGRES_USER: ${POSTGRES_USER:-booklibre}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-booklibre}
+      NO_PROXY: localhost,127.0.0.1,postgres,backend,frontend
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-booklibre} -d ${POSTGRES_DB:-db_booklibre}"]
+      interval: 5s
+      timeout: 5s
+      retries: 20
+    networks:
+      - app_net
+
+## PGadmin Postgres
+  pgadmin:
+    image: dpage/pgadmin4:latest
+    container_name: pgadmin-booklibre
+    restart: unless-stopped
+    environment:
+      PGADMIN_DEFAULT_EMAIL: admin@booklibre.com
+      PGADMIN_DEFAULT_PASSWORD: admin
+      NO_PROXY: localhost,127.0.0.1,postgres,backend,frontend
+    ports:
+      - "5050:80"
+    depends_on:
+      - postgres
+    volumes:
+      - pgadmin_data:/var/lib/pgadmin
+    networks:
+      - app_net
+
+## Mongo simple para desarrollo local
+  mongo:
+    image: mongo:latest
+    container_name: mongo-booklibre
+    restart: unless-stopped
+    ports:
+      - "27017:27017"
+    volumes:
+      - mongo_data:/data/db
+    healthcheck:
+      test: ["CMD", "mongosh", "--quiet", "--eval", "db.adminCommand('ping').ok"]
+      interval: 5s
+      timeout: 5s
+      retries: 20
+    networks:
+      - app_net
+
+## Redis
+  redis:
+    image: redis:7
+    container_name: redis-booklibre
+    restart: unless-stopped
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 5s
+      retries: 20
+    networks:
+      - app_net
+
+## RedisInsight
+  redisinsight:
+    image: redis/redisinsight:latest
+    container_name: redisinsight-booklibre
+    restart: unless-stopped
+    ports:
+      - "5540:5540"
+    depends_on:
+      - redis
+    volumes:
+      - redisinsight_data:/data
+    networks:
+      - app_net
+
+volumes:
+  gradle_cache:
+  frontend_node_modules:
+  postgres_data:
+  pgadmin_data:
+  mongo_data:
+  redis_data:
+  redisinsight_data:
+
+networks:
+  app_net:
+    driver: bridge

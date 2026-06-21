@@ -1,0 +1,12 @@
+# Integrante 4: Analisis de calificaciones
+# Promedio de rankings por tipo de libro. Los libros sin resenas quedan fuera
+# porque su ranking agregado es 0.0.
+
+extend type Query {
+    kpiPromedioCalificacionesPorTipo: [RatingAverageByBookType!]!
+}
+
+type RatingAverageByBookType {
+    bookType:      String!
+    averageRating: Float!
+}

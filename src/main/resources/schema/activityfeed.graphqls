@@ -1,0 +1,40 @@
+# ── Integrante 5: Feed de Actividad Reciente ────────────────────────────────
+# Unifica altas de libros (MongoDB) y reservas confirmadas (PostgreSQL).
+
+extend type Query {
+    recentActivityFeed: [ActivityFeedItem!]!
+}
+
+interface ActivityFeedItem {
+    fecha:      String!
+    tipoEvento: ActivityEventType!
+    usuario:    ActivityUser!
+}
+
+type BookCreatedActivity implements ActivityFeedItem {
+    fecha:      String!
+    tipoEvento: ActivityEventType!
+    usuario:    ActivityUser!
+    bookId:     String!
+    title:      String!
+}
+
+type BookingConfirmedActivity implements ActivityFeedItem {
+    fecha:      String!
+    tipoEvento: ActivityEventType!
+    usuario:    ActivityUser!
+    bookingId:  ID!
+    bookId:     String!
+    bookTitle:  String!
+}
+
+type ActivityUser {
+    id:       ID!
+    username: String!
+    fullName: String!
+}
+
+enum ActivityEventType {
+    BOOK_CREATED
+    BOOKING_CONFIRMED
+}

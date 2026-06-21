@@ -1,0 +1,17 @@
+# ── Integrante 3 - Estado de Salud del Catálogo ─────────────────────────────────────────
+# Clasifica los libros del catálogo según su estado de disponibilidad.
+# Usa las reservas registradas en Mongo para distinguir libros prestados,
+# disponibles sin reservas, disponibles con reservas futuras y disponibles
+# que ya fueron reservados y devueltos.
+
+extend type Query {
+    kpiCatalogHealth: CatalogHealth!
+}
+
+type CatalogHealth {
+    total:                           Int!
+    prestados:                       Int!
+    disponiblesNuncaReservados:      Int!
+    disponiblesReservadosAFuturo:    Int!
+    disponiblesDevueltos:            Int!
+}
