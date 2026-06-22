@@ -99,4 +99,4 @@ Proyecto desarrollado por Rodrigo Casco, Gonzalo Lopez, Nahuel García, Santiago
 
 La documentación técnica ampliada se encuentra en [`docs/`](docs/Home.md).
 
-El cliente web está disponible en [appointment-booking-system-frontend](https://github.com/GonzaloDLopez/appointment-booking-system-frontend).
+El cliente web está disponible en [book-lending-system-frontend](https://github.com/GonzaloDLopez/book-lending-system-frontend).
